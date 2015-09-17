@@ -77,11 +77,11 @@ The client provides simple controls for moving a camera around a scene that cont
 Because of the way Pyrite3D partitions the model data with varying level of details having clean boundaries we can mix and match them (at level of detail boundaries) to create a clean visual representation for the camera. 
 
 Using our client to explore the Nashville sample data it takes just **20 MB** to load the initial view of the scene like this 
-![Nashville initial load ]({{site.baseurl}}/images/2015-09-17-Pyrite3D-Data-Client-Walkthrough/nashville_initial_load.png)
+![Nashville initial load ]({{site.baseurl}}/images/2015-09-17-Pyrite3D-Data-Client-Walkthrough/nashville_initial_load.PNG)
 
 and just **25 MB** more to zoom in and start getting the full detail of some of the mesh.  
 
-![Nashville l1 load ]({{site.baseurl}}/images/2015-09-17-Pyrite3D-Data-Client-Walkthrough/nashville_l1_load.png)
+![Nashville l1 load ]({{site.baseurl}}/images/2015-09-17-Pyrite3D-Data-Client-Walkthrough/nashville_l1_load.PNG)
 
 Obviously we are not loading the full model at high resolution but in terms of what the camera sees it should be quite similar to looking at the original from the same position.  And all for a fraction of the size!
 
