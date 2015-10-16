@@ -54,14 +54,14 @@ Face Count | 20,000,000 | 10,000,000
 As you can see these are some large meshes.  The Pyrite CLI processor discussed in the other case study describes what happens to get them ready for our client in more detail.  This processing also adds to the overall resource requirements of the processing stage, but it allows benefits later on as you will see.
 
 ### Consuming 
-Reconstructions are ultimately useless unless you can do something with them.  In our case even simple viewing of the generated meshes proves to be difficult.  MeshLab takes several minutes to load up the Nashville mesh on my computer, fails to load the texture, and then crawls with unacceptable performance when trying to explore the mesh.
+Reconstructions are ultimately useless unless you can do something with them.  In our case even simply viewing the generated meshes proves to be difficult.  A popular open source tool for viewing large meshes, MeshLab, takes several minutes to load our Nashville mesh on typical desktop hardware, and fails entirely at loading the texture data. Attempting to navigate the mesh is virtually impossible.
 
 After using Pyrite3D we had the reconstruction in a form that would allow for better performance for some cases but it needed a client.  We chose to make a simple mesh explorer demo with the following goals/requirements:
 - Allow navigation around the mesh
 - Allow zooming in to enable full detail viewing of areas
 - Cross platform to demonstrate/test performance limits
 
-We decided to make a Unity3D application because it easily allowed for cross-platform targeting and allowed for quicker prototyping 3D scenarios such as ours.  You can can get and run the sample on [Windows](https://www.microsoft.com/store/apps/9nblggh1mx9z) or [Android](https://play.google.com/apps/testing/com.microsoft.pyrite). In the next section I'll discuss some how the client works and some of the technical solutions we used to make it happen.
+We decided to make a Unity3D application because it easily allowed for cross-platform targeting and allowed for quicker prototyping 3D scenarios such as ours.  You can can get and run the sample on [Windows](https://www.microsoft.com/store/apps/9nblggh1mx9z) or [Android](https://play.google.com/apps/testing/com.microsoft.pyrite). In the next section I'll discuss how the client works and some of the technical solutions we used to make it happen.
 
 ## Client Implementation
 The client provides simple controls for moving a camera around a scene that contains the reconstruction. In order to hold the balance between performance and seeing the full detail of the model the client works as follows:
@@ -82,13 +82,13 @@ and just **25 MB** more to zoom in and start getting the full detail of some of 
 
 ![Nashville l1 load ]({{site.baseurl}}/images/2015-09-17-Pyrite3D-Data-Client-Walkthrough/nashville_l1_load.PNG)
 
-Obviously we are not loading the full model at high resolution but in terms of what the camera sees it should be quite similar to looking at the original from the same position.  And all for a fraction of the size!
+The full model is not loaded all at once, but smaller sections of the full resolution mesh are loaded in areas close to the camera to provide a similar experience at a fraction of the data size.
 
 ### Technical Challenges/Features
 
 
 #### Caching
-The model data initially comes from the Pyrite server but the client does what it can to avoid unneeded requests as that reduces performance.  To that end we use a series of caches to assist.
+The model data is streamed from the Pyrite server, but the client has mechanisms to avoid unneeded requests and improve performance. We use a series of caching mechanisms at various points in the render pipeline.
 - File cache: All model data related requests from the server are persisted to local temporary app storage (with a configurable limit)
 - Memory cache: All requests are also stored in a memory cache
 - The caches are designed to keep the more recently used data items around while evicting those that have not been referenced in a while
@@ -99,7 +99,7 @@ You can see some of the code for this behavior in the [CacheWebRequest](https://
 The client also uses a basic object pool based off the Unity3D [sample](https://unity3d.com/learn/tutorials/modules/beginner/live-training-archive/object-pooling).  This served our purposes just fine but in the future we may consider moving to something with more explicit control around the lifetime of pooled objects instead overloading the active state.
 
 #### Background Thread Usage
-Performance takes a big hit the more we do on the UI/Game thread.  As such we attempted to do as much work as possible in background/worker threads.  Initially this led us to try to use more primitive network classes which could be accessed off game thread unlike [WWW](http://docs.unity3d.com/ScriptReference/WWW.html).  However, this turned out to be an issue when trying to move to various platforms as some of them did not have complete implementations of the classes we used or were limited in some critical way.  But we did use background threads for parsing the responses from the server for vertex and face data.
+Performance takes a big hit the more we do on the UI/Game thread.  As such we attempted to do as much work as possible in background/worker threads.  We did use background threads for parsing and preparing data coming from the server and notifying game threads when it is ready to render.
 
 #### Upgrade/Downgrade detection
 To add the "detection cube" functionality mentioned above we leveraged a few of Unity's built in APIs and helpers.
@@ -110,5 +110,4 @@ To add the "detection cube" functionality mentioned above we leveraged a few of 
 
 
 ## Conclusions
-Pyrite3D can certainly be used to make some client scenarios available in more places than they could have been before.  Working on the client was pretty interesting and a great learning experience.  I'm still learning my way around the deeper levels of Unity and hope to make the performance even better going forward.  All Pyrite3D source is open and up on GitHub [here](https://github.com/PyriteServer).  Feel free to check out it, take it for a spin file issues or contribute!
-
+Pyrite3D can be used to make some client scenarios available in more places than they could have been before.  But it does take some consideration and design when implementing to fully take advantage of the mesh pre-processing the pipeline provides.  All Pyrite3D source is open and up on GitHub [here](https://github.com/PyriteServer).  Feel free to check out it, file issues or contribute.  The demo client is also in the Windows store available [here](https://www.microsoft.com/store/apps/9nblggh1mx9z).
